@@ -2,7 +2,9 @@
 
 #include <stdio.h>
 
-#define MAX_NODES 100000000
+#define MAX_NODES 5000000
+
+#define MAX_VERSIONS 1000001
 
 struct Node{
     int val;
@@ -11,6 +13,10 @@ struct Node{
 
 struct Node pool[MAX_NODES];
 int nodeCount = 1;
+
+int roots[MAX_VERSIONS];
+int levels[MAX_VERSIONS];
+int version = 1;
 
 int newNode(){
     int n = nodeCount;
@@ -26,7 +32,7 @@ int bit(unsigned int x, int k){
 }
 
 int fits(unsigned int index, int level){
-    return (index << level) == 0;
+    return (index >> level) == 0;
 }
 
 int set(int old, int level, unsigned int index, int val){
@@ -45,7 +51,11 @@ int set(int old, int level, unsigned int index, int val){
         oldChild = pool[old].child[bitN];
     }
 
-    pool[n].child[1-bitN] = pool[old].child[1-bitN];
+    pool[n].child[bitN] = set(oldChild, level - 1, index, val);
+
+    if(old != 0){
+        pool[n].child[1 - bitN] = pool[old].child[1 - bitN];
+    }
     return n;
 }
 
@@ -61,10 +71,14 @@ int get(int node, int level, unsigned index){
 }
 int main(){
     char input[20];
-    int root = 0;
-    int level = 0;
+    roots[0] = 0;
+    levels[0] = 0;
 
     while(scanf("%19s", input) == 1){
+
+        int root = roots[version -1];
+        int level = levels[version-1];
+
         if(input[0] == 's'){
             unsigned int index, temp;
             int val, minBits;
@@ -95,7 +109,10 @@ int main(){
                 } else {
                     printf("0\n");
                 }
+            } else if(input[0] == 'u'){
+            if(version > 1){
+                version--;
             }
         }
-    return 0;
+    return 0; 
 }
