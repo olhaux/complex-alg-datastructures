@@ -2,12 +2,12 @@
 
 #include <stdio.h>
 
-#define MAX_NODES 5000000
+#define MAX_NODES 50000000
 
 #define MAX_VERSIONS 1000001
 
 struct Node{
-    int val;
+    int max;
     int child[2];
 };  
 
@@ -21,7 +21,7 @@ int version = 1;
 int newNode(){
     int n = nodeCount;
     nodeCount++;
-    pool[n].val = 0;
+    pool[n].max = 0;
     pool[n].child[0] = 0;
     pool[n].child[1] = 0;
     return n;
@@ -35,13 +35,27 @@ int fits(unsigned int index, int level){
     return (index >> level) == 0;
 }
 
+int maxSub(int node){
+    if(node == 0){
+        return -1;
+    }
+    return pool[node].max;
+}
+
+int bigger(int a, int b){
+    if(a > b){
+        return a;
+    }
+    return b;
+}
+
 int set(int old, int level, unsigned int index, int val){
     int n = newNode();
     int bitN;
     int oldChild;
 
     if(level == 0){
-        pool[n].val = val;
+        pool[n].max = val;
         return n;
     }
 
@@ -56,6 +70,8 @@ int set(int old, int level, unsigned int index, int val){
     if(old != 0){
         pool[n].child[1 - bitN] = pool[old].child[1 - bitN];
     }
+
+    pool[n].max = bigger(maxSub(pool[n].child[0]), maxSub(pool[n].child[1]));
     return n;
 }
 
@@ -67,7 +83,7 @@ int get(int node, int level, unsigned index){
     if (node == 0) {
         return 0;
     }
-    return pool[node].val;
+    return pool[node].max;
 }
 int main(){
     char input[20];
@@ -96,11 +112,14 @@ int main(){
                 if(root != 0){
                     int n = newNode();
                     pool[n].child[0] = root;
+                    pool[n].max = pool[root].max;
                     root = n;
                 }
                 level++;
             }
-            root = set(root, level, index, val);
+            roots[version] = set(root, level, index, val);
+            levels[version] = level;
+            version++;
         }else if(input[0] == 'g'){
                 unsigned int index;
                 scanf("%u", &index);
@@ -113,6 +132,9 @@ int main(){
             if(version > 1){
                 version--;
             }
+        } else if(input[0] == 'm'){
+            printf("%d\n", bigger(maxSub(root), 0));
         }
+    }     
     return 0; 
 }
