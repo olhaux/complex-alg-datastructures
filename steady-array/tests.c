@@ -1,9 +1,7 @@
-/* Tests for steady-array.c.   gcc -O2 -o tests tests.c && ./tests
- *
- * steady-array.c stays one self-contained file so it can go to Kattis as is,
- * which means there is no header to include. So we include the .c file itself
- * and rename its main out of the way, because this file needs its own main.
- */
+// the test suite was made with the help of artificial intelligence, we want to see where to implement ai in our workflow since its permitted in ts course.
+// by going back and forth w claude code and providing it with the cases that needed to be handled (in kattis and in instructions), it determined that the tests below were apt.
+
+
 #define main steady_array_main
 #include "steady-array.c"
 #undef main
