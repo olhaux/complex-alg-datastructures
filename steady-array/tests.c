@@ -1,5 +1,6 @@
 // the test suite was made with the help of artificial intelligence, we want to see where to implement ai in our workflow since its permitted in ts course.
-// by going back and forth w claude code and providing it with the cases that needed to be handled (in kattis and in instructions), it determined that the tests below were apt.
+// by going back and forth w claude code and providing it with the cases that needed to be handled (in kattis and in instructions)
+// it worked thru those and the cases below were created. the rational that we discussed back and forth is commented in each test case
 
 
 #define main steady_array_main
