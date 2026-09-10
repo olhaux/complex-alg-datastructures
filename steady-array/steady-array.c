@@ -82,27 +82,30 @@ int set(int old, int level, unsigned int index, int val){
     int bitN;
     int oldChild;
 
-    if(level == 0){
+    if(level == 0){             // end recursion
         pool[n].max = val;      // a leaf holds the value itself
-        return n;
+        return n;               // which node (node count)
     }
 
     bitN = bit(index, level - 1);   // 0 means go left and 1 means go right
-    oldChild = 0;
-    if(old != 0){
-        oldChild = pool[old].child[bitN];
+    oldChild = 0;                   
+    if(old != 0){                   // if there already exist a way
+        oldChild = pool[old].child[bitN];   // take value from old child
     }
 
+    // start recursion
     pool[n].child[bitN] = set(oldChild, level - 1, index, val);
 
+    // If ärva nodes - get their second child so it's an actual copy
     if(old != 0){
         // we do not copy this side since it points into the old tree
         pool[n].child[1 - bitN] = pool[old].child[1 - bitN];
     }
 
-    // careful here
+
     // recompute from the children and never compare with the old max
     // the new value can be smaller than the one it replaced
+    // only relveant for children (first node set at first if statemetn)
     pool[n].max = bigger(maxSub(pool[n].child[0]), maxSub(pool[n].child[1]));
     return n;
 }
@@ -127,6 +130,7 @@ int maxRight(int node, int level, unsigned int left){
     if(level == 0){
         return pool[node].max;
     }
+    
     if(bit(left, level - 1) == 1){
         // whole left half sits before left so skip it
         return maxRight(pool[node].child[1], level - 1, left);
@@ -136,7 +140,7 @@ int maxRight(int node, int level, unsigned int left){
 }
 
 // largest value with index at most right
-// mirror image of maxRight
+// mirror of maxRight
 int maxLeft(int node, int level, unsigned int right){
     if(node == 0){
         return -1;
@@ -175,17 +179,22 @@ int maxSegment(int node, int level, unsigned int left, unsigned int right){
         return maxSegment(pool[node].child[1], level - 1, left, right);
     }
     // case 5 the ends split up so ask each side on its own and keep the best
+    // maxRight - största värdet på index >= left, alltså allt till höger om gränsen
+    // maxLeft  - största värdet på index <= right, alltså allt till vänster om gränsen
     return bigger(maxRight(pool[node].child[0], level - 1, left), maxLeft(pool[node].child[1], level - 1, right));
 }
 
 int maxInInterval(int root, int level, unsigned int left, unsigned int right){
+    // does it start within limits of the tree
     if(!fits(left, level)){
         return 0;       // left starts past the end of the tree so nothing can be there
     }
+    // does it fit within the limits of the right side (calc. max index)
     if(!fits(right, level)){
         // interval runs past the tree so cut it where the tree ends
         right = (1u << level) - 1;
     }
+    // check for backwards integral
     if(left > right){
         return 0;
     }
@@ -211,8 +220,8 @@ int main(){
 
                 scanf("%u %d", &index, &val);
 
-                level = bigger(level, minBits(index));
-                root = grow(root, levels[version - 1], level);
+                level = bigger(level, minBits(index));  // decides height of our tree
+                root = grow(root, levels[version - 1], level);  // grow the root to that height
 
                 // push it as a new version and leave the old one alone
                 roots[version] = set(root, level, index, val);
