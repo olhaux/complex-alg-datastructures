@@ -1,4 +1,4 @@
-# Builds a Kattis-sized stress test: ~500k-word dictionary, 100 misspelled words.
+# Writes a 500k-word dictionary with 100 misspelled words, about Kattis's max size.
 import random, os
 random.seed(2350)
 src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ordlista.utf8")

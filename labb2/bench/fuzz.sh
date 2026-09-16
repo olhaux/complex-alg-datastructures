@@ -1,5 +1,6 @@
 #!/bin/bash
-# usage: fuzz.sh <version> [cases]  -- compares against v1-dynprog on random small inputs
+# usage: fuzz.sh <version> [cases]
+# Compares output with v1-dynprog on random small inputs.
 V=$1; N=${2:-300}; B=$HOME/labb2-bench; F=$B/fuzz; mkdir -p $F
 python3 - "$F" "$N" <<'PY'
 import random, sys

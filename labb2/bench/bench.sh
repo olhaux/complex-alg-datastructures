@@ -1,6 +1,6 @@
 #!/bin/bash
-# usage: bench.sh <version-folder-name> <test folders...>
-# Compiles labb2/versions/<v> in WSL home, runs the built-in -t tests, then diffs full stdout against .utdata.
+# usage: bench.sh <version> <test folders...>
+# Builds versions/<version> under ~/labb2-bench, runs java Main -t, then diffs stdout against .utdata.
 SRC=$(cd "$(dirname "$0")/.." && pwd)
 V=$1; shift
 W=$HOME/labb2-bench/$V

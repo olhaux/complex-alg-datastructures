@@ -5,12 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ClosestWords {
-  // v4: allt som bara beror på ordlistan räknas ut en gång, inte en gång
-  // per felstavat ord.
+  // Det som bara beror på ordlistan räknas ut en gång när den läses in.
   static class WordList {
     final String[] words;
     final char[][] chars;
-    // prefix[k] = antal inledande bokstäver som ord k har gemensamt med ord k-1
+    // prefix[k]: hur många av dom första bokstäverna ord k delar med ord k-1
     final int[] prefix;
     final int maxLength;
 
@@ -44,9 +43,8 @@ public class ClosestWords {
   public ClosestWords(String w, WordList dict) {
     char[] a = w.toCharArray();
     int w1len = a.length;
-    // M[i][j] = editeringsavståndet mellan de första i bokstäverna i
-    // ordlistordet och de första j bokstäverna i det felstavade ordet.
-    // Matrisen får plats med det längsta ordet och skapas en gång per fråga.
+    // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
+    // felstavade ordets första j. Höjden räcker för det längsta ordet.
     int[][] M = new int[dict.maxLength + 1][w1len + 1];
     for (int j = 0; j <= w1len; j++)
       M[0][j] = j;
@@ -56,7 +54,7 @@ public class ClosestWords {
     for (int k = 0; k < dict.chars.length; k++) {
       char[] b = dict.chars[k];
       int w2len = b.length;
-      // Raderna 0..prefix[k] är kvar från förra ordet (teorifråga 9-10).
+      // Raderna 0..prefix[k] är kvar från förra ordet.
       for (int i = dict.prefix[k] + 1; i <= w2len; i++) {
         int[] prev = M[i - 1];
         int[] cur = M[i];
