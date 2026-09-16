@@ -9,14 +9,12 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // v2: en enda matris per felstavat ord istället för en ny per ordpar.
-  // M[i][j] = editeringsavståndet mellan de första i bokstäverna i
-  // ordlistordet och de första j bokstäverna i det felstavade ordet.
+  // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
+  // felstavade ordets första j. En matris per felstavat ord, inte per ordpar.
   int[][] M = new int[1][1];
   char[] w1chars;
 
-  // Rad 0 (M[0][j] = j) och kolumn 0 (M[i][0] = i) beror inte på
-  // ordlistordet, så dom sätts bara när matrisen skapas.
+  // Rad 0 och kolumn 0 är samma för alla ordlistord, så dom sätts bara här.
   void ensureRows(int rows) {
     if (rows <= M.length)
       return;
@@ -29,7 +27,6 @@ public class ClosestWords {
     M = bigger;
   }
 
-  // Samma dynamiska programmering som v1, rad för rad.
   int partDist(String w2, int w2len) {
     ensureRows(w2len + 1);
     char[] a = w1chars;

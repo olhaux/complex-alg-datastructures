@@ -9,12 +9,9 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // v1: partDist med dynamisk programmering istället för rekursion.
-  // M[i][j] = editeringsavståndet mellan de första i bokstäverna i w2
-  // och de första j bokstäverna i w1. Matrisen fylls rad för rad, och inom
-  // en rad kolumn för kolumn, eftersom Java lagrar varje rad som en
-  // sammanhängande array. Då ligger M[i-1][j-1], M[i-1][j] och M[i][j-1]
-  // nära den cell som skrivs.
+  // M[i][j] är avståndet mellan w2:s första i bokstäver och w1:s första j.
+  // Fylls rad för rad eftersom varje rad är en egen int[] i minnet, så
+  // cellerna vi läser ligger bredvid den vi skriver.
   int partDist(String w1, String w2, int w1len, int w2len) {
     int[][] M = new int[w2len + 1][w1len + 1];
     for (int j = 0; j <= w1len; j++)

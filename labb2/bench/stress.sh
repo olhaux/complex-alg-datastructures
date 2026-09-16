@@ -1,5 +1,6 @@
 #!/bin/bash
-# usage: stress.sh <version> [runs]  -- needs bench.sh to have compiled the version first
+# usage: stress.sh <version> [runs]
+# Run bench.sh on the version first so it is compiled.
 V=$1; RUNS=${2:-3}
 D=$HOME/labb2-bench; cd $D/$V || exit 1
 IN=$D/stress/stress500k.indata; EXP=$D/stress/stress500k.utdata

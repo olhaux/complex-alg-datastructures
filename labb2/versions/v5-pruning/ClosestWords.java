@@ -5,12 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ClosestWords {
-  // v4/v5: allt som bara beror på ordlistan räknas ut en gång, inte en gång
-  // per felstavat ord.
+  // Det som bara beror på ordlistan räknas ut en gång när den läses in.
   static class WordList {
     final String[] words;
     final char[][] chars;
-    // prefix[k] = antal inledande bokstäver som ord k har gemensamt med ord k-1
+    // prefix[k]: hur många av dom första bokstäverna ord k delar med ord k-1
     final int[] prefix;
     final int maxLength;
 
@@ -44,31 +43,25 @@ public class ClosestWords {
   public ClosestWords(String w, WordList dict) {
     char[] a = w.toCharArray();
     int w1len = a.length;
-    // M[i][j] = editeringsavståndet mellan de första i bokstäverna i
-    // ordlistordet och de första j bokstäverna i det felstavade ordet.
-    // Matrisen får plats med det längsta ordet och skapas en gång per fråga.
+    // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
+    // felstavade ordets första j. Höjden räcker för det längsta ordet.
     int[][] M = new int[dict.maxLength + 1][w1len + 1];
     for (int j = 0; j <= w1len; j++)
       M[0][j] = j;
     for (int i = 0; i <= dict.maxLength; i++)
       M[i][0] = i;
 
-    // v5: validRows = antal rader (utöver rad 0) som stämmer för det
-    // senast behandlade ordet. Efter ett överhoppat eller avbrutet ord är
-    // bara raderna fram till där vi slutade räkna giltiga.
+    // Hur många rader efter rad 0 som stämmer för förra ordet. Hoppar vi
+    // över ett ord eller avbryter det stämmer bara dom rader vi hann räkna.
     int validRows = 0;
     for (int k = 0; k < dict.chars.length; k++) {
       char[] b = dict.chars[k];
       int w2len = b.length;
-      // Raderna 0..prefix[k] beror bara på bokstäver som ord k delar med
-      // ord k-1, så dom stämmer för ord k om dom stämde för ord k-1.
       if (dict.prefix[k] < validRows)
         validRows = dict.prefix[k];
 
-      // Avståndet är minst längdskillnaden, eftersom varje insättning eller
-      // borttagning ändrar längden med högst 1. Är den redan större än bästa
-      // avståndet kan ordet inte vara med i svaret. (Strikt större: ord på
-      // exakt bästa avståndet ska skrivas ut.)
+      // Avståndet är minst längdskillnaden. Strikt större, för ord på exakt
+      // bästa avståndet ska med i svaret.
       int lengthDiff = w2len > w1len ? w2len - w1len : w1len - w2len;
       if (closestDistance != -1 && lengthDiff > closestDistance)
         continue;
@@ -92,10 +85,7 @@ public class ClosestWords {
             rowMin = res;
         }
         validRows = i;
-        // Varje cell på rad i+1 är minst minsta värdet på rad i (alla tre
-        // grannar ligger på rad i eller till vänster på samma rad, och
-        // M[i+1][0] = i+1 > M[i][0]). Minimum per rad kan alltså inte minska,
-        // och M[w2len][w1len] blir minst rowMin.
+        // Radminimum kan inte minska nedåt, så slutvärdet blir minst rowMin.
         if (closestDistance != -1 && rowMin > closestDistance) {
           aborted = true;
           break;
