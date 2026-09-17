@@ -9,12 +9,10 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
-  // felstavade ordets första j. En matris per felstavat ord, inte per ordpar.
+  // återanvänds för alla ord i listan
   int[][] M = new int[1][1];
   char[] w1chars;
 
-  // Rad 0 och kolumn 0 är samma för alla ordlistord, så dom sätts bara här.
   void ensureRows(int rows) {
     if (rows <= M.length)
       return;

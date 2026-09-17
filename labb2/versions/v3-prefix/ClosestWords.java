@@ -9,13 +9,10 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
-  // felstavade ordets första j.
   int[][] M = new int[1][1];
   char[] w1chars;
 
-  // Rad i beror bara på ordlistordets första i bokstäver. Delar ordet sina
-  // första p bokstäver med prevWord kan vi börja på rad p+1.
+  // raderna för gemensamt prefix med förra ordet behöver inte räknas om
   String prevWord = "";
 
   void ensureRows(int rows) {
@@ -28,7 +25,7 @@ public class ClosestWords {
     for (int i = 0; i < rows; i++)
       bigger[i][0] = i;
     M = bigger;
-    prevWord = ""; // bara rad 0 är ifylld i nya matrisen
+    prevWord = "";
   }
 
   int partDist(String w2, int w2len) {
