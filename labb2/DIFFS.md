@@ -17,12 +17,10 @@ The base cases `if (w1len == 0) return w2len` and `if (w2len == 0) return w1len`
 ```diff
 --- a/v0-original/ClosestWords.java
 +++ b/v1-dynprog/ClosestWords.java
-@@ -10,18 +10,26 @@ public class ClosestWords {
+@@ -10,18 +10,24 @@ public class ClosestWords {
    int closestDistance = -1;
  
-+  // M[i][j] är avståndet mellan w2:s första i bokstäver och w1:s första j.
-+  // Fylls rad för rad eftersom varje rad är en egen int[] i minnet, så
-+  // cellerna vi läser ligger bredvid den vi skriver.
++  // fyller rad för rad, bättre minneslokalitet
    int partDist(String w1, String w2, int w1len, int w2len) {
 -    if (w1len == 0)
 -      return w2len;
@@ -74,12 +72,10 @@ Look for three things:
 ```diff
 --- a/v1-dynprog/ClosestWords.java
 +++ b/v2-reuse-matrix/ClosestWords.java
-@@ -10,23 +10,37 @@ public class ClosestWords {
+@@ -10,21 +10,37 @@ public class ClosestWords {
    int closestDistance = -1;
  
--  // M[i][j] är avståndet mellan w2:s första i bokstäver och w1:s första j.
--  // Fylls rad för rad eftersom varje rad är en egen int[] i minnet, så
--  // cellerna vi läser ligger bredvid den vi skriver.
+-  // fyller rad för rad, bättre minneslokalitet
 -  int partDist(String w1, String w2, int w1len, int w2len) {
 -    int[][] M = new int[w2len + 1][w1len + 1];
 -    for (int j = 0; j <= w1len; j++)
@@ -124,7 +120,7 @@ Look for three things:
 +        cur[j] = res;
        }
      }
-@@ -34,12 +48,11 @@ public class ClosestWords {
+@@ -32,12 +48,11 @@ public class ClosestWords {
    }
  
 -  int distance(String w1, String w2) {

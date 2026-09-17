@@ -9,9 +9,7 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // M[i][j] är avståndet mellan w2:s första i bokstäver och w1:s första j.
-  // Fylls rad för rad eftersom varje rad är en egen int[] i minnet, så
-  // cellerna vi läser ligger bredvid den vi skriver.
+  // fyller rad för rad, bättre minneslokalitet
   int partDist(String w1, String w2, int w1len, int w2len) {
     int[][] M = new int[w2len + 1][w1len + 1];
     for (int j = 0; j <= w1len; j++)
