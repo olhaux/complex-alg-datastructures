@@ -20,6 +20,21 @@ Measured in WSL (OpenJDK 11), wall-clock time including JVM start (~60 ms).
 
 The large3/large4 columns come from the `-t` timer, so they don't include JVM start. At 30–60 ms they are mostly noise; the stress column is the one to compare.
 
+## Kattis
+
+The time limit is 2.00 s per test, and there are 7 tests.
+
+| Version | Result | Tests passed |
+|---|---|---|
+| v0-original | Time Limit Exceeded | 2/7 |
+| v1-dynprog | Time Limit Exceeded | 4/7 |
+| v2-reuse-matrix | Time Limit Exceeded | 6/7 |
+| v3-prefix | Accepted, 1.22 s | 7/7 |
+
+v4 and v5 weren't submitted. v3 was enough, so prefix reuse is the step that got the program under the time limit.
+
+v3 passed Kattis in 1.22 s but took 5.2 s on my stress input. Kattis's hardest test is probably smaller than 500,000 words × 100 queries, or its machine is faster, or both.
+
 **How the v0 estimates were made.** Running v0 on `large/` would take hours, so I counted the calls instead. `partDist` on words of lengths m and n makes C(m, n) = 1 + C(m−1, n−1) + C(m−1, n) + C(m, n−1) calls. Summed over the dictionary, that is 1.8·10¹¹ calls for large3 and 1.2·10¹⁴ for large4. One pair with 3.4·10⁸ calls took 437 ms after JVM start, which is 1.3 ns per call.
 
 ## What each step does and why it helps
