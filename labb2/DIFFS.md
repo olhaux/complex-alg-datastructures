@@ -74,7 +74,7 @@ Look for three things:
 ```diff
 --- a/v1-dynprog/ClosestWords.java
 +++ b/v2-reuse-matrix/ClosestWords.java
-@@ -10,23 +10,39 @@ public class ClosestWords {
+@@ -10,23 +10,37 @@ public class ClosestWords {
    int closestDistance = -1;
  
 -  // M[i][j] är avståndet mellan w2:s första i bokstäver och w1:s första j.
@@ -84,12 +84,10 @@ Look for three things:
 -    int[][] M = new int[w2len + 1][w1len + 1];
 -    for (int j = 0; j <= w1len; j++)
 -      M[0][j] = j;
-+  // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
-+  // felstavade ordets första j. En matris per felstavat ord, inte per ordpar.
++  // återanvänds för alla ord i listan
 +  int[][] M = new int[1][1];
 +  char[] w1chars;
 +
-+  // Rad 0 och kolumn 0 är samma för alla ordlistord, så dom sätts bara här.
 +  void ensureRows(int rows) {
 +    if (rows <= M.length)
 +      return;
@@ -126,7 +124,7 @@ Look for three things:
 +        cur[j] = res;
        }
      }
-@@ -34,12 +50,11 @@ public class ClosestWords {
+@@ -34,12 +48,11 @@ public class ClosestWords {
    }
  
 -  int distance(String w1, String w2) {
@@ -159,25 +157,22 @@ Example: after `abbedissa` comes `abbedissan`. `p` = 9, so only row 10 is comput
 ```diff
 --- a/v2-reuse-matrix/ClosestWords.java
 +++ b/v3-prefix/ClosestWords.java
-@@ -11,9 +11,12 @@ public class ClosestWords {
+@@ -10,8 +10,10 @@ public class ClosestWords {
+   int closestDistance = -1;
  
-   // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
--  // felstavade ordets första j. En matris per felstavat ord, inte per ordpar.
-+  // felstavade ordets första j.
+-  // återanvänds för alla ord i listan
    int[][] M = new int[1][1];
    char[] w1chars;
  
--  // Rad 0 och kolumn 0 är samma för alla ordlistord, så dom sätts bara här.
-+  // Rad i beror bara på ordlistordets första i bokstäver. Delar ordet sina
-+  // första p bokstäver med prevWord kan vi börja på rad p+1.
++  // raderna för gemensamt prefix med förra ordet behöver inte räknas om
 +  String prevWord = "";
 +
    void ensureRows(int rows) {
      if (rows <= M.length)
-@@ -26,11 +29,16 @@ public class ClosestWords {
+@@ -24,11 +26,16 @@ public class ClosestWords {
        bigger[i][0] = i;
      M = bigger;
-+    prevWord = ""; // bara rad 0 är ifylld i nya matrisen
++    prevWord = "";
    }
  
    int partDist(String w2, int w2len) {
@@ -192,7 +187,7 @@ Example: after `abbedissa` comes `abbedissan`. `p` = 9, so only row 10 is comput
 +    for (int i = p + 1; i <= w2len; i++) {
        int[] prev = M[i - 1];
        int[] cur = M[i];
-@@ -47,4 +55,5 @@ public class ClosestWords {
+@@ -45,4 +52,5 @@ public class ClosestWords {
        }
      }
 +    prevWord = w2;
@@ -214,27 +209,24 @@ The diff is big, but most of it is code moving. Look for these parts:
 ```diff
 --- a/v3-prefix/ClosestWords.java
 +++ b/v4-precomputed-prefix/ClosestWords.java
-@@ -6,71 +6,77 @@ import java.util.List;
+@@ -6,68 +6,74 @@ import java.util.List;
  
  public class ClosestWords {
 -  LinkedList<String> closestWords = null;
 -
 -  int closestDistance = -1;
 -
--  // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
--  // felstavade ordets första j.
 -  int[][] M = new int[1][1];
 -  char[] w1chars;
-+  // Det som bara beror på ordlistan räknas ut en gång när den läses in.
++  // räknas ut en gång per ordlista
 +  static class WordList {
 +    final String[] words;
 +    final char[][] chars;
-+    // prefix[k]: hur många av dom första bokstäverna ord k delar med ord k-1
++    // prefix[k] = gemensamt prefix med ord k-1
 +    final int[] prefix;
 +    final int maxLength;
  
--  // Rad i beror bara på ordlistordets första i bokstäver. Delar ordet sina
--  // första p bokstäver med prevWord kan vi börja på rad p+1.
+-  // raderna för gemensamt prefix med förra ordet behöver inte räknas om
 -  String prevWord = "";
 -
 -  void ensureRows(int rows) {
@@ -247,7 +239,7 @@ The diff is big, but most of it is code moving. Look for these parts:
 -    for (int i = 0; i < rows; i++)
 -      bigger[i][0] = i;
 -    M = bigger;
--    prevWord = ""; // bara rad 0 är ifylld i nya matrisen
+-    prevWord = "";
 -  }
 -
 -  int partDist(String w2, int w2len) {
@@ -307,8 +299,6 @@ The diff is big, but most of it is code moving. Look for these parts:
 +  public ClosestWords(String w, WordList dict) {
 +    char[] a = w.toCharArray();
 +    int w1len = a.length;
-+    // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
-+    // felstavade ordets första j. Höjden räcker för det längsta ordet.
 +    int[][] M = new int[dict.maxLength + 1][w1len + 1];
 +    for (int j = 0; j <= w1len; j++)
        M[0][j] = j;
@@ -320,7 +310,6 @@ The diff is big, but most of it is code moving. Look for these parts:
 +    for (int k = 0; k < dict.chars.length; k++) {
 +      char[] b = dict.chars[k];
 +      int w2len = b.length;
-+      // Raderna 0..prefix[k] är kvar från förra ordet.
 +      for (int i = dict.prefix[k] + 1; i <= w2len; i++) {
 +        int[] prev = M[i - 1];
 +        int[] cur = M[i];
@@ -380,27 +369,22 @@ Four additions to the loop over dictionary words:
 3. **`rowMin`.** It tracks the smallest value in the current row. If it exceeds `closestDistance` after the row, the word can't reach the best distance, so `aborted = true; break;`, then `continue`.
 4. Both tests use `>`, not `>=`, so words at exactly the best distance are still printed.
 
-Note: `if (w2len < validRows) validRows = w2len;` never triggers. `validRows` can't exceed `prefix[k]`, and that can't exceed `w2len`. If the row loop runs, it leaves `validRows = w2len`. Deleting the line changes nothing. It's harmless, but a supervisor might ask about it.
-
 ```diff
 --- a/v4-precomputed-prefix/ClosestWords.java
 +++ b/v5-pruning/ClosestWords.java
-@@ -52,12 +52,25 @@ public class ClosestWords {
+@@ -50,11 +50,23 @@ public class ClosestWords {
        M[i][0] = i;
  
-+    // Hur många rader efter rad 0 som stämmer för förra ordet. Hoppar vi
-+    // över ett ord eller avbryter det stämmer bara dom rader vi hann räkna.
++    // rader som fortfarande stämmer (vi hoppar ju över/avbryter ibland)
 +    int validRows = 0;
      for (int k = 0; k < dict.chars.length; k++) {
        char[] b = dict.chars[k];
        int w2len = b.length;
--      // Raderna 0..prefix[k] är kvar från förra ordet.
 -      for (int i = dict.prefix[k] + 1; i <= w2len; i++) {
 +      if (dict.prefix[k] < validRows)
 +        validRows = dict.prefix[k];
 +
-+      // Avståndet är minst längdskillnaden. Strikt större, för ord på exakt
-+      // bästa avståndet ska med i svaret.
++      // avståndet är minst längdskillnaden
 +      int lengthDiff = w2len > w1len ? w2len - w1len : w1len - w2len;
 +      if (closestDistance != -1 && lengthDiff > closestDistance)
 +        continue;
@@ -413,14 +397,14 @@ Note: `if (w2len < validRows) validRows = w2len;` never triggers. `validRows` ca
 +        int rowMin = cur[0];
          for (int j = 1; j <= w1len; j++) {
            int res = prev[j - 1] + (a[j - 1] == c ? 0 : 1);
-@@ -69,6 +82,19 @@ public class ClosestWords {
+@@ -66,6 +78,17 @@ public class ClosestWords {
              res = deleteLetter;
            cur[j] = res;
 +          if (res < rowMin)
 +            rowMin = res;
 +        }
 +        validRows = i;
-+        // Radminimum kan inte minska nedåt, så slutvärdet blir minst rowMin.
++        // hela raden redan sämre, ge upp
 +        if (closestDistance != -1 && rowMin > closestDistance) {
 +          aborted = true;
 +          break;
@@ -428,8 +412,6 @@ Note: `if (w2len < validRows) validRows = w2len;` never triggers. `validRows` ca
        }
 +      if (aborted)
 +        continue;
-+      if (w2len < validRows)
-+        validRows = w2len;
 +
        int dist = M[w2len][w1len];
        if (dist < closestDistance || closestDistance == -1) {

@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ClosestWords {
-  // Det som bara beror på ordlistan räknas ut en gång när den läses in.
+  // räknas ut en gång per ordlista
   static class WordList {
     final String[] words;
     final char[][] chars;
-    // prefix[k]: hur många av dom första bokstäverna ord k delar med ord k-1
+    // prefix[k] = gemensamt prefix med ord k-1
     final int[] prefix;
     final int maxLength;
 
@@ -43,16 +43,13 @@ public class ClosestWords {
   public ClosestWords(String w, WordList dict) {
     char[] a = w.toCharArray();
     int w1len = a.length;
-    // M[i][j] är avståndet mellan ordlistordets första i bokstäver och det
-    // felstavade ordets första j. Höjden räcker för det längsta ordet.
     int[][] M = new int[dict.maxLength + 1][w1len + 1];
     for (int j = 0; j <= w1len; j++)
       M[0][j] = j;
     for (int i = 0; i <= dict.maxLength; i++)
       M[i][0] = i;
 
-    // Hur många rader efter rad 0 som stämmer för förra ordet. Hoppar vi
-    // över ett ord eller avbryter det stämmer bara dom rader vi hann räkna.
+    // rader som fortfarande stämmer (vi hoppar ju över/avbryter ibland)
     int validRows = 0;
     for (int k = 0; k < dict.chars.length; k++) {
       char[] b = dict.chars[k];
@@ -60,8 +57,7 @@ public class ClosestWords {
       if (dict.prefix[k] < validRows)
         validRows = dict.prefix[k];
 
-      // Avståndet är minst längdskillnaden. Strikt större, för ord på exakt
-      // bästa avståndet ska med i svaret.
+      // avståndet är minst längdskillnaden
       int lengthDiff = w2len > w1len ? w2len - w1len : w1len - w2len;
       if (closestDistance != -1 && lengthDiff > closestDistance)
         continue;
@@ -85,7 +81,7 @@ public class ClosestWords {
             rowMin = res;
         }
         validRows = i;
-        // Radminimum kan inte minska nedåt, så slutvärdet blir minst rowMin.
+        // hela raden redan sämre, ge upp
         if (closestDistance != -1 && rowMin > closestDistance) {
           aborted = true;
           break;
@@ -93,8 +89,6 @@ public class ClosestWords {
       }
       if (aborted)
         continue;
-      if (w2len < validRows)
-        validRows = w2len;
 
       int dist = M[w2len][w1len];
       if (dist < closestDistance || closestDistance == -1) {
