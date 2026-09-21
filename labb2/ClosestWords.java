@@ -9,30 +9,59 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  int partDist(String w1, String w2, int w1len, int w2len) {
-    if (w1len == 0)
-      return w2len;
-    if (w2len == 0)
-      return w1len;
-    int res = partDist(w1, w2, w1len - 1, w2len - 1) + 
-	(w1.charAt(w1len - 1) == w2.charAt(w2len - 1) ? 0 : 1);
-    int addLetter = partDist(w1, w2, w1len - 1, w2len) + 1;
-    if (addLetter < res)
-      res = addLetter;
-    int deleteLetter = partDist(w1, w2, w1len, w2len - 1) + 1;
-    if (deleteLetter < res)
-      res = deleteLetter;
-    return res;
+  int[][] M = new int[1][1];
+  char[] w1chars;
+
+  // raderna för gemensamt prefix med förra ordet behöver inte räknas om
+  String prevWord = "";
+
+  void ensureRows(int rows) {
+    if (rows <= M.length)
+      return;
+    int cols = w1chars.length + 1;
+    int[][] bigger = new int[rows][cols];
+    for (int j = 0; j < cols; j++)
+      bigger[0][j] = j;
+    for (int i = 0; i < rows; i++)
+      bigger[i][0] = i;
+    M = bigger;
+    prevWord = "";
   }
 
-  int distance(String w1, String w2) {
-    return partDist(w1, w2, w1.length(), w2.length());
+  int partDist(String w2, int w2len) {
+    ensureRows(w2len + 1);
+    int p = 0;
+    int maxP = Math.min(w2len, prevWord.length());
+    while (p < maxP && w2.charAt(p) == prevWord.charAt(p))
+      p++;
+    char[] a = w1chars;
+    int w1len = a.length;
+    for (int i = p + 1; i <= w2len; i++) {
+      int[] prev = M[i - 1];
+      int[] cur = M[i];
+      char c = w2.charAt(i - 1);
+      for (int j = 1; j <= w1len; j++) {
+        int res = prev[j - 1] + (a[j - 1] == c ? 0 : 1);
+        int addLetter = prev[j] + 1;
+        if (addLetter < res)
+          res = addLetter;
+        int deleteLetter = cur[j - 1] + 1;
+        if (deleteLetter < res)
+          res = deleteLetter;
+        cur[j] = res;
+      }
+    }
+    prevWord = w2;
+    return M[w2len][w1len];
   }
 
   public ClosestWords(String w, List<String> wordList) {
+    w1chars = w.toCharArray();
+    M = new int[1][w1chars.length + 1];
+    for (int j = 0; j <= w1chars.length; j++)
+      M[0][j] = j;
     for (String s : wordList) {
-      int dist = distance(w, s);
-      // System.out.println("d(" + w + "," + s + ")=" + dist);
+      int dist = partDist(s, s.length());
       if (dist < closestDistance || closestDistance == -1) {
         closestDistance = dist;
         closestWords = new LinkedList<String>();
